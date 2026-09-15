@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Phrasal Verb Mountain Crush - Alpine Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Montserrat:wght@700;800;900&display=swap');
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #0b0f19;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        /* Top Bar */
+        #top-bar {
+            height: 48px;
+            background: rgba(18, 24, 38, 0.95);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 2px 0 rgba(214, 158, 46, 0.15);
+            z-index: 30;
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Baloo 2', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            color: #FFE600;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .brand .peak { font-size: 18px; }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn {
+            background: linear-gradient(180deg, #48BB78 0%, #2F855A 100%);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            font-weight: 900;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 6px;
+            box-shadow: 0 4px 0 #1C4532;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: filter 0.15s ease;
+        }
+
+        .btn:hover { filter: brightness(1.08); }
+
+        .btn:active {
+            box-shadow: 0 1px 0 #1C4532;
+            transform: translateY(3px);
+        }
+
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #E2E8F0;
+        }
+
+        .audio-controls input[type=range] {
+            accent-color: #48BB78;
+            width: 90px;
+        }
+
+        /* Container & Split Screen */
+        #game-container {
+            display: flex;
+            width: 100vw;
+            height: calc(100vh - 48px);
+            position: relative;
+        }
+
+        .team-screen {
+            flex: 1;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            border-right: 6px solid transparent;
+            border-image: linear-gradient(180deg, #5C3A21, #D69E2E 50%, #5C3A21) 1;
+            box-shadow: 4px 0 14px rgba(0, 0, 0, 0.4);
+        }
+
+        .team-screen:last-child {
+            border-right: none;
+            box-shadow: none;
+        }
+
+        #t1 .score-badge { border-color: rgba(49, 130, 206, 0.55); }
+        #t2 .score-badge { border-color: rgba(221, 107, 32, 0.55); }
+
+        /* HUD Superior Flotante */
+        .hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px 14px;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stats-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-cluster {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score-badge {
+            background: rgba(15, 23, 42, 0.75);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 13px;
+            font-weight: 900;
+            color: #F6E05E;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .tier-badge {
+            font-size: 10px;
+            font-weight: 900;
+            padding: 4px 9px;
+            border-radius: 20px;
+            letter-spacing: 0.4px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            transition: color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .tier-badge.tier-easy { color: #68D391; border-color: rgba(104, 211, 145, 0.45); }
+        .tier-badge.tier-medium { color: #F6E05E; border-color: rgba(246, 224, 94, 0.45); }
+        .tier-badge.tier-hard { color: #F6AD55; border-color: rgba(246, 173, 85, 0.45); }
+        .tier-badge.tier-expert { color: #D6BCFA; border-color: rgba(214, 188, 250, 0.45); }
+
+        /* Contador de Fallos */
+        .failures-box {
+            background: rgba(15, 23, 42, 0.75);
+            border: 2px solid rgba(245, 101, 101, 0.4);
+            border-radius: 8px;
+            padding: 4px 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            backdrop-filter: blur(4px);
+        }
+
+        .failures-label {
+            font-size: 11px;
+            color: #FC8181;
+            font-weight: 900;
+            margin-right: 2px;
+        }
+
+        .strike-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #742A2A;
+            background: #2D3748;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #718096;
+            font-weight: 900;
+        }
+
+        .strike-icon.active {
+            background: #E53E3E;
+            border-color: #FFF;
+            color: #FFF;
+            box-shadow: 0 0 10px #E53E3E;
+        }
+
+        .strike-icon.pulse { animation: strikePulse 0.4s ease; }
+
+        @keyframes strikePulse {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.55); box-shadow: 0 0 16px #E53E3E; }
+            100% { transform: scale(1); }
+        }
+
+        /* Combo */
+        .combo-badge {
+            margin-top: 6px;
+            font-family: 'Baloo 2', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #FFE600;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 3px 12px;
+            border-radius: 20px;
+            opacity: 0;
+            transform: scale(0.6) translateY(-4px);
+            transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
+        }
+
+        .combo-badge.show { opacity: 1; transform: scale(1) translateY(0); }
+
+        /* Texto de Acción en Español Flotante */
+        .target-action-floating {
+            margin-top: 32px;
+            font-family: 'Baloo 2', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            color: #FFE600;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            text-shadow:
+                3px 3px 0 #000,
+               -3px 3px 0 #000,
+                3px -3px 0 #000,
+               -3px -3px 0 #000,
+                0px 3px 0 #000,
+                0px -3px 0 #000,
+                3px 0px 0 #000,
+               -3px 0px 0 #000,
+                0 6px 12px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+            animation: floatY 3s ease-in-out infinite;
+        }
+
+        @keyframes floatY {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        #t2 .target-action-floating { color: #FF9F1C; }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Overlay de Inicio */
+        #start-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(9,13,22,0.42) 0%, rgba(9,13,22,0.74) 55%, rgba(9,13,22,0.9) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 40;
+            text-align: center;
+            padding: 20px;
+            backdrop-filter: blur(6px) saturate(1.15);
+        }
+
+        .overlay-panel {
+            position: relative;
+            background: linear-gradient(180deg, rgba(26,32,48,0.94), rgba(14,18,29,0.96));
+            border: 2px solid rgba(255,255,255,0.08);
+            border-radius: 18px;
+            padding: 34px 30px 28px;
+            max-width: 560px;
+            width: 100%;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        .overlay-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            border-radius: 18px 18px 0 0;
+            background: linear-gradient(90deg, #5C3A21, #D69E2E 30%, #F6E05E 50%, #D69E2E 70%, #5C3A21);
+        }
+
+        #start-overlay h1 {
+            font-family: 'Baloo 2', sans-serif;
+            font-size: 34px;
+            line-height: 1.08;
+            letter-spacing: 0.4px;
+            margin-bottom: 14px;
+            background: linear-gradient(180deg, #FFF4CC 0%, #FFE600 55%, #F6AD16 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.55);
+        }
+
+        .subtitle {
+            font-size: 14.5px;
+            color: #CBD5E0;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .how-to-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+            margin-bottom: 26px;
+            text-align: left;
+        }
+
+        .how-to-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 13.5px;
+            color: #E2E8F0;
+            line-height: 1.5;
+        }
+
+        .how-to-item .ic { font-size: 20px; line-height: 1.2; flex-shrink: 0; }
+        .how-to-item strong { color: #FFE600; }
+        .how-to-item.warn { color: #FEB2B2; }
+        .how-to-item.warn strong { color: #FC8181; }
+
+        .start-btn-lg {
+            font-size: 17px;
+            padding: 14px 34px;
+            animation: pulseGlow 2.2s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 4px 0 #1C4532, 0 0 0 rgba(72,187,120,0.5); }
+            50% { box-shadow: 0 4px 0 #1C4532, 0 0 22px rgba(72,187,120,0.7); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .start-btn-lg, .target-action-floating { animation: none; }
+        }
+
+        @media (max-width: 480px) {
+            .brand span:last-child { display: none; }
+            .overlay-panel { padding: 24px 18px; }
+            #start-overlay h1 { font-size: 26px; }
+            .subtitle { font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgm" loop>
+        <source src="2804.mp3" type="audio/mp3">
+    </audio>
+
+    <div id="top-bar">
+        <div class="brand"><span class="peak">🏔️</span><span>PHRASAL CRUSH</span></div>
+        <div class="top-actions">
+            <button class="btn" id="start-btn" onclick="startGame()">¡EMPEZAR!</button>
+            <div class="audio-controls">
+                <span>🎵 MÚSICA</span>
+                <input type="range" id="volume" min="0" max="1" step="0.05" value="0.5" onchange="updateVolume(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <!-- Equipo 1 -->
+        <div class="team-screen" id="t1">
+            <div class="hud">
+                <div class="stats-bar">
+                    <div class="score-cluster">
+                        <div class="score-badge">EQ 1: <span id="score-1">0</span></div>
+                        <div class="tier-badge tier-easy" id="tier-1">FÁCIL</div>
+                    </div>
+                    <div class="failures-box">
+                        <span class="failures-label">FALLOS:</span>
+                        <div class="strike-icon" id="t1-s1">✕</div>
+                        <div class="strike-icon" id="t1-s2">✕</div>
+                        <div class="strike-icon" id="t1-s3">✕</div>
+                    </div>
+                </div>
+                <div class="combo-badge" id="combo-1"></div>
+                <div class="target-action-floating" id="target-1">CARGANDO...</div>
+            </div>
+            <canvas id="canvas-1"></canvas>
+        </div>
+
+        <!-- Equipo 2 -->
+        <div class="team-screen" id="t2">
+            <div class="hud">
+                <div class="stats-bar">
+                    <div class="score-cluster">
+                        <div class="score-badge">EQ 2: <span id="score-2">0</span></div>
+                        <div class="tier-badge tier-easy" id="tier-2">FÁCIL</div>
+                    </div>
+                    <div class="failures-box">
+                        <span class="failures-label">FALLOS:</span>
+                        <div class="strike-icon" id="t2-s1">✕</div>
+                        <div class="strike-icon" id="t2-s2">✕</div>
+                        <div class="strike-icon" id="t2-s3">✕</div>
+                    </div>
+                </div>
+                <div class="combo-badge" id="combo-2"></div>
+                <div class="target-action-floating" id="target-2">CARGANDO...</div>
+            </div>
+            <canvas id="canvas-2"></canvas>
+        </div>
+
+        <!-- Overlay de Inicio -->
+        <div id="start-overlay">
+            <div class="overlay-panel">
+                <h1>PHRASAL VERB<br>MOUNTAIN CRUSH</h1>
+                <p class="subtitle">
+                    Guía tu roca gigante cuesta abajo y aplasta la traducción correcta en inglés antes de que la montaña te alcance. Cuatro niveles de dificultad y más de cien phrasal verbs te esperan.
+                </p>
+                <div class="how-to-grid">
+                    <div class="how-to-item"><span class="ic">👆</span><div><strong>Toque:</strong> pulsa el lado izquierdo o derecho de tu pantalla para mover la piedra.</div></div>
+                    <div class="how-to-item"><span class="ic">⌨️</span><div><strong>Teclado:</strong> Equipo 1 usa A / D — Equipo 2 usa ← / →.</div></div>
+                    <div class="how-to-item warn"><span class="ic">💥</span><div><strong>3 fallos</strong> y la piedra explota: tu racha y velocidad se reinician.</div></div>
+                </div>
+                <button class="btn start-btn-lg" onclick="startGame()">¡EMPEZAR AHORA!</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- UTILIDADES ---
+        function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+        function lerp(a, b, t) { return a + (b - a) * t; }
+
+        // --- BASE DE DATOS EFL PHRASAL VERBS (4 NIVELES, +100 VERBOS) ---
+        const PHRASAL_VERBS = {
+            easy: [
+                { es: "Apagar (la luz o un aparato)", correct: "turn off", wrong: ["turn on", "sit down"] },
+                { es: "Encender (la luz o un aparato)", correct: "turn on", wrong: ["turn off", "stand up"] },
+                { es: "Levantarse (de la cama)", correct: "get up", wrong: ["sit down", "lie down"] },
+                { es: "Sentarse", correct: "sit down", wrong: ["get up", "stand up"] },
+                { es: "Ponerse de pie", correct: "stand up", wrong: ["sit down", "lie down"] },
+                { es: "Acostarse / Tumbarse", correct: "lie down", wrong: ["get up", "stand up"] },
+                { es: "Entrar", correct: "come in", wrong: ["go out", "go away"] },
+                { es: "Salir", correct: "go out", wrong: ["come in", "come back"] },
+                { es: "Ponerse (ropa)", correct: "put on", wrong: ["take off", "try on"] },
+                { es: "Quitarse (ropa)", correct: "take off", wrong: ["put on", "put back"] },
+                { es: "Probarse (ropa)", correct: "try on", wrong: ["put on", "take off"] },
+                { es: "Despertarse", correct: "wake up", wrong: ["get up", "lie down"] },
+                { es: "Volver / Regresar", correct: "come back", wrong: ["go away", "go out"] },
+                { es: "Irse / Marcharse", correct: "go away", wrong: ["come back", "come in"] },
+                { es: "Colgar (el teléfono)", correct: "hang up", wrong: ["pick up", "turn off"] },
+                { es: "Recoger (algo del suelo)", correct: "pick up", wrong: ["put down", "hang up"] },
+                { es: "Dejar (algo en el suelo)", correct: "put down", wrong: ["pick up", "put on"] },
+                { es: "Subir (a un autobús o tren)", correct: "get on", wrong: ["get off", "get in"] },
+                { es: "Bajar (de un autobús o tren)", correct: "get off", wrong: ["get on", "get in"] },
+                { es: "Entrar (a un coche/taxi)", correct: "get in", wrong: ["get out of", "get on"] },
+                { es: "Salir (de un coche/taxi)", correct: "get out of", wrong: ["get in", "get off"] },
+                { es: "Continuar", correct: "go on", wrong: ["stop by", "come back"] },
+                { es: "Devolver la llamada", correct: "call back", wrong: ["hang up", "call off"] },
+                { es: "Buscar (algo)", correct: "look for", wrong: ["look at", "look after"] },
+                { es: "Cuidar a alguien", correct: "look after", wrong: ["look for", "take after"] },
+                { es: "Esperar un momento", correct: "hold on", wrong: ["hang up", "go on"] },
+                { es: "Vestirse", correct: "get dressed", wrong: ["get up", "dress up"] },
+                { es: "Anotar / Escribir", correct: "write down", wrong: ["read out", "put down"] },
+                { es: "Ordenar / Limpiar", correct: "tidy up", wrong: ["clean out", "put away"] },
+                { es: "Guardar en su lugar", correct: "put away", wrong: ["put down", "tidy up"] }
+            ],
+            medium: [
+                { es: "Rendirse", correct: "give up", wrong: ["keep on", "put off"] },
+                { es: "Despegar (un avión)", correct: "take off", wrong: ["land on", "put on"] },
+                { es: "Cancelar", correct: "call off", wrong: ["put off", "carry on"] },
+                { es: "Posponer", correct: "put off", wrong: ["call off", "carry on"] },
+                { es: "Continuar (con algo)", correct: "carry on", wrong: ["give up", "call off"] },
+                { es: "Agotarse / Acabarse", correct: "run out of", wrong: ["get over", "break down"] },
+                { es: "Averiarse / Descomponerse", correct: "break down", wrong: ["break up", "break in"] },
+                { es: "Terminar una relación", correct: "break up", wrong: ["break down", "get along with"] },
+                { es: "Llevarse bien con alguien", correct: "get along with", wrong: ["break up with", "look up to"] },
+                { es: "Admirar a alguien", correct: "look up to", wrong: ["look down on", "get along with"] },
+                { es: "Menospreciar a alguien", correct: "look down on", wrong: ["look up to", "put up with"] },
+                { es: "Registrarse (en un hotel)", correct: "check in", wrong: ["check out", "drop by"] },
+                { es: "Pagar la cuenta y salir (de un hotel)", correct: "check out", wrong: ["check in", "drop by"] },
+                { es: "Visitar brevemente", correct: "drop by", wrong: ["check out", "drop off"] },
+                { es: "Dejar a alguien o algo en un lugar", correct: "drop off", wrong: ["pick up", "drop by"] },
+                { es: "Recoger a alguien (en coche)", correct: "pick up", wrong: ["drop off", "pick on"] },
+                { es: "Rellenar (un formulario)", correct: "fill in", wrong: ["find out", "fill up"] },
+                { es: "Llenar (el tanque)", correct: "fill up", wrong: ["fill in", "find out"] },
+                { es: "Descubrir / Averiguar", correct: "find out", wrong: ["figure out", "look into"] },
+                { es: "Investigar", correct: "look into", wrong: ["find out", "look up"] },
+                { es: "Superar (una dificultad)", correct: "get over", wrong: ["get through", "run out of"] },
+                { es: "Lograr pasar por (algo difícil)", correct: "get through", wrong: ["get over", "go through"] },
+                { es: "Revisar / Repasar", correct: "go through", wrong: ["look into", "get through"] },
+                { es: "Entregar (un trabajo)", correct: "hand in", wrong: ["hand out", "give back"] },
+                { es: "Repartir", correct: "hand out", wrong: ["hand in", "give back"] },
+                { es: "Devolver (algo prestado)", correct: "give back", wrong: ["hand in", "hand out"] },
+                { es: "Pasar el rato / Salir con amigos", correct: "hang out", wrong: ["hang on", "hang up"] },
+                { es: "Mantenerse al día con", correct: "keep up with", wrong: ["catch up with", "put up with"] },
+                { es: "Alcanzar a alguien / Ponerse al día", correct: "catch up with", wrong: ["keep up with", "come across"] },
+                { es: "Encontrarse con algo por casualidad", correct: "come across", wrong: ["run into", "catch up with"] },
+                { es: "Encontrarse con alguien por casualidad", correct: "run into", wrong: ["come across", "come up with"] }
+            ],
+            hard: [
+                { es: "Tolerar / Aguantar", correct: "put up with", wrong: ["look forward to", "cut down on"] },
+                { es: "Inventar / Idear (una idea)", correct: "come up with", wrong: ["keep up with", "run into"] },
+                { es: "Salirse con la suya (sin castigo)", correct: "get away with", wrong: ["get along with", "look up to"] },
+                { es: "Tener ganas de / Esperar con ilusión", correct: "look forward to", wrong: ["put off", "call off"] },
+                { es: "Reducir el consumo de algo", correct: "cut down on", wrong: ["give up", "put up with"] },
+                { es: "Deshacerse de algo", correct: "get rid of", wrong: ["put up with", "do away with"] },
+                { es: "Eliminar / Abolir", correct: "do away with", wrong: ["get rid of", "come across"] },
+                { es: "Enfrentar (un problema)", correct: "face up to", wrong: ["put up with", "get over"] },
+                { es: "Quedarse atrás / Retrasarse", correct: "fall behind", wrong: ["keep up with", "catch up with"] },
+                { es: "Fracasar (un plan)", correct: "fall through", wrong: ["fall behind", "work out"] },
+                { es: "Vengarse de alguien", correct: "get back at", wrong: ["get along with", "get away with"] },
+                { es: "Progresar / Llevarse bien en una situación", correct: "get on with", wrong: ["get along with", "put up with"] },
+                { es: "Compensar algo", correct: "make up for", wrong: ["come up with", "put up with"] },
+                { es: "Admitir (un error)", correct: "own up to", wrong: ["face up to", "get away with"] },
+                { es: "Estar a la altura de (las expectativas)", correct: "live up to", wrong: ["look up to", "make up for"] },
+                { es: "Ponerse en marcha / Partir", correct: "set off", wrong: ["set up", "take off"] },
+                { es: "Apoyar firmemente a alguien", correct: "stick up for", wrong: ["put up with", "stand by"] },
+                { es: "Aprovecharse de algo o alguien", correct: "take advantage of", wrong: ["get away with", "look forward to"] },
+                { es: "Estar atento / Tener cuidado con algo", correct: "watch out for", wrong: ["look forward to", "keep away from"] },
+                { es: "Mantenerse alejado de", correct: "keep away from", wrong: ["watch out for", "cut down on"] },
+                { es: "Contar con alguien", correct: "count on", wrong: ["rely on", "look after"] },
+                { es: "Estar de acuerdo e ir junto con (una idea)", correct: "go along with", wrong: ["get along with", "put up with"] },
+                { es: "Regalar / Renunciar a algo", correct: "give away", wrong: ["give up", "give back"] },
+                { es: "Resultar / Terminar siendo", correct: "end up", wrong: ["turn out", "come up with"] },
+                { es: "Resultar ser", correct: "turn out", wrong: ["end up", "come up with"] },
+                { es: "Delegar / Entregar el control", correct: "hand over", wrong: ["hand in", "hand out"] },
+                { es: "Reprimir / Contener (emociones)", correct: "hold back", wrong: ["hold on", "put up with"] },
+                { es: "Idear un plan / Resultar bien", correct: "work out", wrong: ["figure out", "come up with"] },
+                { es: "Resolver (un problema)", correct: "figure out", wrong: ["work out", "sort out"] },
+                { es: "Solucionar / Organizar", correct: "sort out", wrong: ["figure out", "clean up"] }
+            ],
+            expert: [
+                { es: "Llevar a cabo (una tarea)", correct: "carry out", wrong: ["carry on", "carry away"] },
+                { es: "Hacerse cargo de (una empresa)", correct: "take over", wrong: ["take up", "take back"] },
+                { es: "Reducir personal / Despedir", correct: "lay off", wrong: ["lay out", "cut down on"] },
+                { es: "Retirar gradualmente (un producto)", correct: "phase out", wrong: ["phase in", "roll out"] },
+                { es: "Introducir gradualmente", correct: "phase in", wrong: ["phase out", "roll out"] },
+                { es: "Aumentar rápidamente (la producción)", correct: "ramp up", wrong: ["build up", "scale back"] },
+                { es: "Reprimir con firmeza (protestas)", correct: "crack down on", wrong: ["put down", "clamp down on"] },
+                { es: "Aplazar (una decisión)", correct: "hold off on", wrong: ["put off", "call off"] },
+                { es: "Creer en / Apoyar (una idea)", correct: "buy into", wrong: ["go along with", "get on with"] },
+                { es: "Llegar al fondo del asunto", correct: "get to the bottom of", wrong: ["look into", "go through"] },
+                { es: "Acordar tras mucha discusión (un trato)", correct: "hammer out", wrong: ["work out", "sort out"] },
+                { es: "Terminar abruptamente (una relación o trato)", correct: "break off", wrong: ["break up", "call off"] },
+                { es: "Rebajar el precio", correct: "mark down", wrong: ["knock off", "cut down on"] },
+                { es: "Acumularse (con el tiempo)", correct: "build up", wrong: ["pile up", "ramp up"] },
+                { es: "Estropear / Arruinar algo", correct: "mess up", wrong: ["screw up", "mix up"] },
+                { es: "Presentar / Lanzar (un producto)", correct: "roll out", wrong: ["bring out", "phase in"] },
+                { es: "Reconciliarse (tras una pelea)", correct: "make up", wrong: ["break up", "get along with"] },
+                { es: "Revisar detenidamente (documentos)", correct: "go over", wrong: ["look into", "go through"] }
+            ]
+        };
+
+        // --- RENDERIZADOR Y MOTOR DE JUEGO ---
+        class ModernMountainGame {
+            constructor(teamId, canvasId, targetId, scoreId, strikesPrefix) {
+                this.teamId = teamId;
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.targetEl = document.getElementById(targetId);
+                this.scoreEl = document.getElementById(scoreId);
+                this.strikesPrefix = strikesPrefix;
+                this.comboEl = document.getElementById('combo-' + teamId);
+                this.tierEl = document.getElementById('tier-' + teamId);
+
+                this.score = 0;
+                this.failures = 0;
+                this.streak = 0;
+                this.baseSpeed = 3.8;
+                this.speedMultiplier = 1.0;
+
+                this.boulderX = 0.5;
+                this.boulderRadius = 65;
+                this.boulderRotation = 0;
+
+                this.isExploding = false;
+                this.explosionTimer = 0;
+                this.particles = [];
+                this.climberYOffset = 0;
+
+                this.trailParticles = [];
+                this.floatingTexts = [];
+                this.shakeFrames = 0;
+                this.shakeMag = 0;
+                this.flashAlpha = 0;
+                this.flashColor = '255,255,255';
+                this.cloudOffset = 0;
+                this.roadScroll = 0;
+
+                this.obstacles = [];
+                this.scenery = [];
+                this.snow = [];
+                this.clouds = [];
+                this.birds = [];
+                this.moveDir = 0;
+                this.questionsCount = 0;
+
+                this.resizeCanvas();
+                this.generateBoulderMesh();
+                this.initScenery();
+                this.initSnow();
+                this.initClouds();
+                this.initBirds();
+            }
+
+            resizeCanvas() {
+                this.canvas.width = this.canvas.parentElement.clientWidth;
+                this.canvas.height = this.canvas.parentElement.clientHeight;
+            }
+
+            // --- GENERACIÓN DE MALLA 3D DE LA ROCA (icosaedro subdividido) ---
+            generateBoulderMesh() {
+                const phi = (1 + Math.sqrt(5)) / 2;
+                const baseVerts = [
+                    [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
+                    [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
+                    [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]
+                ];
+                const baseFaces = [
+                    [0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11],
+                    [1, 5, 9], [5, 11, 4], [11, 10, 2], [10, 7, 6], [7, 1, 8],
+                    [3, 9, 4], [3, 4, 2], [3, 2, 6], [3, 6, 8], [3, 8, 9],
+                    [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1]
+                ];
+
+                const verts = baseVerts.map(v => {
+                    const len = Math.hypot(v[0], v[1], v[2]);
+                    const noise = 0.85 + Math.random() * 0.3;
+                    return [
+                        v[0] / len * this.boulderRadius * noise,
+                        v[1] / len * this.boulderRadius * noise,
+                        v[2] / len * this.boulderRadius * noise
+                    ];
+                });
+
+                const midCache = new Map();
+                const getMid = (i1, i2) => {
+                    const key = i1 < i2 ? (i1 + '_' + i2) : (i2 + '_' + i1);
+                    if (midCache.has(key)) return midCache.get(key);
+                    const a = verts[i1], b = verts[i2];
+                    const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, mz = (a[2] + b[2]) / 2;
+                    const len = Math.hypot(mx, my, mz) || 1;
+                    const noise = 0.9 + Math.random() * 0.2;
+                    const target = this.boulderRadius * noise;
+                    const idx = verts.length;
+                    verts.push([mx / len * target, my / len * target, mz / len * target]);
+                    midCache.set(key, idx);
+                    return idx;
+                };
+
+                const newFaces = [];
+                baseFaces.forEach(f => {
+                    const a = f[0], b = f[1], c = f[2];
+                    const ab = getMid(a, b), bc = getMid(b, c), ca = getMid(c, a);
+                    newFaces.push([a, ab, ca], [b, bc, ab], [c, ca, bc], [ab, bc, ca]);
+                });
+
+                this.polyNodes = verts;
+                this.polyFaces = newFaces;
+            }
+
+            initScenery() {
+                this.scenery = [];
+                const count = 18;
+                for (let i = 0; i < count; i++) {
+                    this.scenery.push({
+                        y: Math.random() * this.canvas.height,
+                        side: Math.random() > 0.5 ? 'left' : 'right',
+                        type: Math.random() > 0.4 ? 'pine' : (Math.random() > 0.5 ? 'rock' : 'house'),
+                        scale: 0.7 + Math.random() * 0.5
+                    });
+                }
+            }
+
+            initSnow() {
+                this.snow = [];
+                const count = 34;
+                for (let i = 0; i < count; i++) {
+                    this.snow.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        vy: 0.4 + Math.random() * 0.9,
+                        r: 1 + Math.random() * 2.2,
+                        phase: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            initClouds() {
+                this.clouds = [];
+                for (let layer = 0; layer < 2; layer++) {
+                    for (let i = 0; i < 4; i++) {
+                        this.clouds.push({
+                            layer: layer,
+                            xBase: Math.random(),
+                            y: this.canvas.height * (0.05 + Math.random() * 0.16 + layer * 0.02),
+                            scale: 0.6 + Math.random() * 0.8 + layer * 0.3,
+                            speed: layer === 0 ? 0.15 : 0.35
+                        });
+                    }
+                }
+            }
+
+            initBirds() {
+                this.birds = [];
+                for (let i = 0; i < 3; i++) {
+                    this.birds.push({
+                        x: Math.random(),
+                        y: 40 + Math.random() * 60,
+                        speed: 0.15 + Math.random() * 0.1,
+                        phase: Math.random() * 10
+                    });
+                }
+            }
+
+            // --- MODELO DE PROFUNDIDAD / PERSPECTIVA COMPARTIDO ---
+            boulderY() {
+                return this.canvas.height - 120;
+            }
+
+            depthT(y) {
+                const h = this.canvas.height;
+                const horizon = h * 0.34;
+                const near = this.boulderY();
+                const denom = Math.max(50, near - horizon);
+                return clamp((y - horizon) / denom, 0, 1);
+            }
+
+            depthScale(t) {
+                const zFar = 1.0, zNear = 0.35;
+                const z = zFar - (zFar - zNear) * t;
+                return zNear / z; // 0.35 en el horizonte .. 1.0 junto a la roca
+            }
+
+            roadHalfAt(t) {
+                return 0.10 + 0.25 * this.depthScale(t);
+            }
+
+            nextQuestion() {
+                let pool, tierName, tierClass;
+                if (this.questionsCount < 5) { pool = PHRASAL_VERBS.easy; tierName = 'FÁCIL'; tierClass = 'tier-easy'; }
+                else if (this.questionsCount < 10) { pool = PHRASAL_VERBS.medium; tierName = 'MEDIO'; tierClass = 'tier-medium'; }
+                else if (this.questionsCount < 15) { pool = PHRASAL_VERBS.hard; tierName = 'DIFÍCIL'; tierClass = 'tier-hard'; }
+                else { pool = PHRASAL_VERBS.expert; tierName = 'EXPERTO'; tierClass = 'tier-expert'; }
+
+                const q = pool[Math.floor(Math.random() * pool.length)];
+                this.currentQuestion = q;
+                this.targetEl.innerText = q.es.toUpperCase();
+
+                if (this.tierEl) {
+                    this.tierEl.textContent = tierName;
+                    this.tierEl.className = 'tier-badge ' + tierClass;
+                }
+
+                const options = [
+                    { text: q.correct, isCorrect: true },
+                    { text: q.wrong[0], isCorrect: false },
+                    { text: q.wrong[1], isCorrect: false }
+                ].sort(() => Math.random() - 0.5);
+
+                this.obstacles = options.map((opt, i) => ({
+                    text: opt.text,
+                    isCorrect: opt.isCorrect,
+                    lane: i - 1,
+                    y: -100 - Math.random() * 70 - i * 18
+                }));
+            }
+
+            update() {
+                if (this.isExploding) {
+                    this.updateAmbient();
+                    this.updateExplosion();
+                    return;
+                }
+
+                const speed = this.baseSpeed * this.speedMultiplier;
+
+                if (this.moveDir !== 0) {
+                    this.boulderX += this.moveDir * 0.024;
+                    this.boulderX = clamp(this.boulderX, 0.20, 0.80);
+                }
+
+                this.boulderRotation += speed * 0.035;
+
+                this.scenery.forEach(item => {
+                    item.y += speed;
+                    if (item.y > this.canvas.height + 80) {
+                        item.y = -80;
+                        item.side = Math.random() > 0.5 ? 'left' : 'right';
+                    }
+                });
+
+                const boulderAbsX = this.boulderX * this.canvas.width;
+                const boulderY = this.boulderY();
+
+                for (let i = this.obstacles.length - 1; i >= 0; i--) {
+                    const obs = this.obstacles[i];
+                    obs.y += speed;
+
+                    const t = this.depthT(obs.y);
+                    const roadHalf = this.roadHalfAt(t);
+                    const obsX = (0.5 + obs.lane * roadHalf * 0.85) * this.canvas.width;
+                    const dist = Math.hypot(boulderAbsX - obsX, boulderY - obs.y);
+
+                    if (dist < this.boulderRadius + 32) {
+                        this.handleHit(obs.isCorrect, obsX, obs.y);
+                        break;
+                    }
+
+                    if (obs.y > this.canvas.height + 80) {
+                        this.obstacles.splice(i, 1);
+                    }
+                }
+
+                if (this.obstacles.length === 0 && !this.isExploding) {
+                    this.nextQuestion();
+                }
+
+                // Estela de polvo / nieve tras la roca
+                if (Math.random() < 0.28 + 0.12 * this.speedMultiplier) {
+                    this.trailParticles.push({
+                        x: boulderAbsX + (Math.random() - 0.5) * this.boulderRadius * 1.3,
+                        y: boulderY + this.boulderRadius * 0.55 + (Math.random() - 0.5) * 8,
+                        vx: (Math.random() - 0.5) * 2 - this.moveDir * 1.4,
+                        vy: -Math.random() * 1.4 - 0.4,
+                        life: 24 + Math.random() * 14,
+                        maxLife: 38,
+                        size: 3 + Math.random() * 5,
+                        color: Math.random() > 0.5 ? '255,255,255' : '203,213,224'
+                    });
+                }
+                for (let i = this.trailParticles.length - 1; i >= 0; i--) {
+                    const p = this.trailParticles[i];
+                    p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.life--;
+                    if (p.life <= 0) this.trailParticles.splice(i, 1);
+                }
+
+                this.updateAmbient();
+            }
+
+            updateAmbient() {
+                this.cloudOffset += 0.6;
+
+                this.snow.forEach(f => {
+                    f.y += f.vy;
+                    if (f.y > this.canvas.height) {
+                        f.y = -10;
+                        f.x = Math.random() * this.canvas.width;
+                    }
+                });
+
+                if (this.shakeFrames > 0) this.shakeFrames--;
+                if (this.flashAlpha > 0) this.flashAlpha = Math.max(0, this.flashAlpha - 0.025);
+
+                for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+                    const ft = this.floatingTexts[i];
+                    ft.y += ft.vy;
+                    ft.life--;
+                    if (ft.life <= 0) this.floatingTexts.splice(i, 1);
+                }
+            }
+
+            handleHit(isCorrect, hitX, hitY) {
+                this.questionsCount++;
+                if (isCorrect) {
+                    this.streak++;
+                    const gain = 100 + Math.min(this.streak - 1, 9) * 10;
+                    this.score += gain;
+                    this.scoreEl.innerText = this.score;
+                    this.speedMultiplier = Math.max(1.0, this.speedMultiplier - 0.05);
+                    this.spawnFloatingText('+' + gain, '#68D391', hitX, hitY);
+                    this.flashColor = '72,187,120';
+                    this.flashAlpha = 0.30;
+                } else {
+                    this.score = Math.max(0, this.score - 50);
+                    this.scoreEl.innerText = this.score;
+                    this.failures++;
+                    this.streak = 0;
+                    this.speedMultiplier += 0.35;
+                    this.updateStrikeIcons();
+                    this.spawnFloatingText('-50', '#FC8181', hitX, hitY);
+                    this.flashColor = '229,62,62';
+                    this.flashAlpha = 0.35;
+                    this.shakeFrames = 14;
+                    this.shakeMag = 9;
+
+                    if (this.failures >= 3) {
+                        this.triggerExplosion();
+                        this.updateCombo();
+                        return;
+                    }
+                }
+                this.updateCombo();
+                this.obstacles = [];
+            }
+
+            spawnFloatingText(text, color, x, y) {
+                this.floatingTexts.push({ text: text, color: color, x: x, y: y, vy: -1.1, life: 55 });
+            }
+
+            updateCombo() {
+                if (!this.comboEl) return;
+                if (this.streak >= 2) {
+                    this.comboEl.textContent = '🔥 x' + this.streak;
+                    this.comboEl.classList.add('show');
+                } else {
+                    this.comboEl.classList.remove('show');
+                }
+            }
+
+            updateStrikeIcons() {
+                for (let i = 1; i <= 3; i++) {
+                    const icon = document.getElementById(this.strikesPrefix + '-s' + i);
+                    const shouldBeActive = i <= this.failures;
+                    if (shouldBeActive && !icon.classList.contains('active')) {
+                        icon.classList.add('pulse');
+                        setTimeout(() => icon.classList.remove('pulse'), 400);
+                    }
+                    icon.classList.toggle('active', shouldBeActive);
+                }
+            }
+
+            triggerExplosion() {
+                this.isExploding = true;
+                this.explosionTimer = 0;
+                this.particles = [];
+                this.trailParticles = [];
+                this.climberYOffset = 0;
+
+                const bx = this.boulderX * this.canvas.width;
+                const by = this.boulderY();
+
+                for (let i = 0; i < 70; i++) {
+                    const roll = Math.random();
+                    const color = roll > 0.55 ? '#4A5568' : (roll > 0.36 ? '#E53E3E' : (roll > 0.18 ? '#DD6B20' : '#F6E05E'));
+                    this.particles.push({
+                        x: bx, y: by,
+                        vx: (Math.random() - 0.5) * 24,
+                        vy: (Math.random() - 0.9) * 24,
+                        size: 6 + Math.random() * 20,
+                        color: color,
+                        rot: Math.random() * Math.PI,
+                        vRot: (Math.random() - 0.5) * 0.45
+                    });
+                }
+            }
+
+            updateExplosion() {
+                this.explosionTimer++;
+                this.climberYOffset -= 5;
+
+                this.particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.45;
+                    p.rot += p.vRot;
+                });
+
+                if (this.explosionTimer > 90) {
+                    this.isExploding = false;
+                    this.failures = 0;
+                    this.speedMultiplier = 1.0;
+                    this.updateStrikeIcons();
+                    this.obstacles = [];
+                    this.climberYOffset = 0;
+                    this.nextQuestion();
+                }
+            }
+
+            // --- DIBUJO ---
+            draw() {
+                const w = this.canvas.width;
+                const h = this.canvas.height;
+
+                this.ctx.save();
+                if (this.shakeFrames > 0) {
+                    const s = this.shakeFrames / 14;
+                    this.ctx.translate((Math.random() - 0.5) * this.shakeMag * s, (Math.random() - 0.5) * this.shakeMag * s);
+                }
+
+                this.drawArtisticBackground(w, h);
+                this.drawScenery(w, h);
+                this.drawSnow(w, h);
+
+                if (!this.isExploding) {
+                    this.drawObstacles(w, h);
+                }
+
+                const bx = this.boulderX * w;
+                const by = this.boulderY();
+
+                if (!this.isExploding) {
+                    this.drawTrailParticles();
+                    this.draw3DLowPolyBoulder(bx, by);
+                    if (this.speedMultiplier > 1.4) this.drawSpeedLines(bx, by);
+                    this.draw8BitClimber(bx, by - this.boulderRadius + 6);
+                } else {
+                    this.drawExplosionParticles();
+                    this.draw8BitClimber(bx, by - this.boulderRadius + this.climberYOffset, true);
+                }
+
+                this.drawFloatingTexts();
+                this.ctx.restore();
+
+                if (this.flashAlpha > 0) {
+                    this.ctx.fillStyle = 'rgba(' + this.flashColor + ',' + this.flashAlpha + ')';
+                    this.ctx.fillRect(0, 0, w, h);
+                }
+                this.drawVignette(w, h);
+            }
+
+            drawArtisticBackground(w, h) {
+                // Cielo
+                const skyGrad = this.ctx.createLinearGradient(0, 0, 0, h * 0.5);
+                skyGrad.addColorStop(0, '#161B29');
+                skyGrad.addColorStop(0.5, '#2D3748');
+                skyGrad.addColorStop(1, '#4A5568');
+                this.ctx.fillStyle = skyGrad;
+                this.ctx.fillRect(0, 0, w, h);
+
+                this.drawClouds(w, h);
+                this.drawBirds(w, h);
+
+                // Sol con resplandor
+                const sunX = w * 0.5, sunY = h * 0.28;
+                const glow = this.ctx.createRadialGradient(sunX, sunY, 10, sunX, sunY, 120);
+                glow.addColorStop(0, 'rgba(251,211,141,0.55)');
+                glow.addColorStop(1, 'rgba(251,211,141,0)');
+                this.ctx.fillStyle = glow;
+                this.ctx.beginPath();
+                this.ctx.arc(sunX, sunY, 120, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                this.ctx.fillStyle = '#FBD38D';
+                this.ctx.beginPath();
+                this.ctx.arc(sunX, sunY, 45, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // Cumbres lejanas con nieve
+                this.ctx.fillStyle = '#2B6CB0';
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, h * 0.32);
+                this.ctx.lineTo(w * 0.25, h * 0.16);
+                this.ctx.lineTo(w * 0.5, h * 0.35);
+                this.ctx.lineTo(w * 0.75, h * 0.14);
+                this.ctx.lineTo(w, h * 0.32);
+                this.ctx.lineTo(w, h);
+                this.ctx.lineTo(0, h);
+                this.ctx.fill();
+
+                this.ctx.fillStyle = '#E2E8F0';
+                this.ctx.beginPath();
+                this.ctx.moveTo(w * 0.25, h * 0.16);
+                this.ctx.lineTo(w * 0.31, h * 0.21);
+                this.ctx.lineTo(w * 0.19, h * 0.21);
+                this.ctx.closePath();
+                this.ctx.fill();
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(w * 0.75, h * 0.14);
+                this.ctx.lineTo(w * 0.81, h * 0.20);
+                this.ctx.lineTo(w * 0.69, h * 0.20);
+                this.ctx.closePath();
+                this.ctx.fill();
+
+                // Neblina atmosférica (pista de profundidad)
+                const hazeGrad = this.ctx.createLinearGradient(0, h * 0.26, 0, h * 0.40);
+                hazeGrad.addColorStop(0, 'rgba(226,232,240,0)');
+                hazeGrad.addColorStop(0.5, 'rgba(226,232,240,0.25)');
+                hazeGrad.addColorStop(1, 'rgba(226,232,240,0)');
+                this.ctx.fillStyle = hazeGrad;
+                this.ctx.fillRect(0, h * 0.26, w, h * 0.14);
+
+                // Colinas boscosas intermedias
+                this.ctx.fillStyle = '#2F855A';
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, h * 0.32);
+                this.ctx.quadraticCurveTo(w * 0.3, h * 0.26, w * 0.5, h * 0.34);
+                this.ctx.quadraticCurveTo(w * 0.8, h * 0.38, w, h * 0.30);
+                this.ctx.lineTo(w, h);
+                this.ctx.lineTo(0, h);
+                this.ctx.fill();
+
+                // Valle
+                const grassGrad = this.ctx.createLinearGradient(0, h * 0.32, 0, h);
+                grassGrad.addColorStop(0, '#48BB78');
+                grassGrad.addColorStop(1, '#276749');
+                this.ctx.fillStyle = grassGrad;
+                this.ctx.fillRect(0, h * 0.34, w, h * 0.66);
+
+                this.drawRoad(w, h);
+                this.drawRoadMarkings(w, h);
+            }
+
+            drawClouds(w, h) {
+                this.clouds.forEach(c => {
+                    let x = (c.xBase * w + this.cloudOffset * c.speed * 10) % (w + 300) - 150;
+                    const alpha = c.layer === 0 ? 0.16 : 0.28;
+                    this.ctx.save();
+                    this.ctx.globalAlpha = alpha;
+                    this.ctx.fillStyle = '#E2E8F0';
+                    const puffs = [[0, 0, 1], [26, 4, 0.8], [-24, 6, 0.75], [10, -8, 0.6], [-10, 8, 0.65]];
+                    puffs.forEach(p => {
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(x + p[0] * c.scale, c.y + p[1] * c.scale, 26 * c.scale * p[2], 14 * c.scale * p[2], 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    });
+                    this.ctx.restore();
+                });
+            }
+
+            drawBirds(w, h) {
+                this.birds.forEach(b => {
+                    b.x += b.speed * 0.001;
+                    if (b.x > 1.2) b.x = -0.2;
+                    const x = b.x * w;
+                    const y = b.y + Math.sin(this.cloudOffset * 0.1 + b.phase) * 4;
+                    this.ctx.strokeStyle = 'rgba(203,213,224,0.55)';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x - 8, y);
+                    this.ctx.quadraticCurveTo(x - 3, y - 6, x, y);
+                    this.ctx.quadraticCurveTo(x + 3, y - 6, x + 8, y);
+                    this.ctx.stroke();
+                });
+            }
+
+            drawRoad(w, h) {
+                const horizon = h * 0.34;
+                const topHalf = this.roadHalfAt(0);
+                const botHalf = this.roadHalfAt(1) + 0.08;
+
+                this.ctx.fillStyle = '#D69E2E';
+                this.ctx.beginPath();
+                this.ctx.moveTo(w * (0.5 - topHalf), horizon);
+                this.ctx.lineTo(w * (0.5 + topHalf), horizon);
+                this.ctx.lineTo(w * (0.5 + botHalf), h);
+                this.ctx.lineTo(w * (0.5 - botHalf), h);
+                this.ctx.fill();
+
+                const innerTop = topHalf * 0.86, innerBot = botHalf * 0.86;
+                this.ctx.fillStyle = '#7B341E';
+                this.ctx.beginPath();
+                this.ctx.moveTo(w * (0.5 - innerTop), horizon);
+                this.ctx.lineTo(w * (0.5 + innerTop), horizon);
+                this.ctx.lineTo(w * (0.5 + innerBot), h);
+                this.ctx.lineTo(w * (0.5 - innerBot), h);
+                this.ctx.fill();
+            }
+
+            drawRoadMarkings(w, h) {
+                const horizon = h * 0.34;
+                this.roadScroll += this.baseSpeed * this.speedMultiplier;
+                const spacing = 60;
+                const count = 10;
+
+                for (let i = 0; i < count; i++) {
+                    const y = horizon + ((this.roadScroll + i * spacing) % (spacing * count));
+                    if (y > h + 20) continue;
+                    const t = this.depthT(y);
+                    const ds = this.depthScale(t);
+                    const half = this.roadHalfAt(t) * w * 0.12;
+                    const cx = w * 0.5;
+                    this.ctx.fillStyle = 'rgba(255,255,255,' + (0.15 + 0.35 * ds) + ')';
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(cx, y, half, 3 * ds + 1, 0, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
+
+            drawScenery(w, h) {
+                const sorted = this.scenery.slice().sort((a, b) => a.y - b.y);
+                sorted.forEach(s => {
+                    const t = this.depthT(s.y);
+                    const ds = this.depthScale(t);
+                    const roadHalf = this.roadHalfAt(t);
+                    const margin = 0.03 + 0.20 * ds;
+                    const xFrac = s.side === 'left' ? (0.5 - roadHalf - margin) : (0.5 + roadHalf + margin);
+                    const x = xFrac * w;
+                    const scale = s.scale * (0.3 + 0.9 * ds);
+
+                    this.ctx.save();
+                    this.ctx.globalAlpha = 0.22 + 0.45 * ds;
+                    this.ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(x, s.y + 7 * scale, 13 * scale, 4.5 * scale, 0, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+
+                    this.ctx.save();
+                    this.ctx.globalAlpha = 0.55 + 0.45 * ds;
+                    this.ctx.translate(x, s.y);
+                    this.ctx.scale(scale, scale);
+
+                    if (s.type === 'pine') {
+                        this.ctx.fillStyle = '#543D2B';
+                        this.ctx.fillRect(-5, 0, 10, 18);
+
+                        this.ctx.fillStyle = '#1C4532';
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(0, -32);
+                        this.ctx.lineTo(18, -10);
+                        this.ctx.lineTo(-18, -10);
+                        this.ctx.fill();
+
+                        this.ctx.fillStyle = '#2F855A';
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(0, -22);
+                        this.ctx.lineTo(15, 2);
+                        this.ctx.lineTo(-15, 2);
+                        this.ctx.fill();
+                    } else if (s.type === 'house') {
+                        this.ctx.fillStyle = '#9C4221';
+                        this.ctx.fillRect(-12, -8, 24, 18);
+                        this.ctx.fillStyle = '#742A2A';
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(0, -22);
+                        this.ctx.lineTo(16, -8);
+                        this.ctx.lineTo(-16, -8);
+                        this.ctx.fill();
+                        this.ctx.fillStyle = '#FBD38D';
+                        this.ctx.fillRect(-4, -4, 8, 6);
+                    } else {
+                        this.ctx.fillStyle = '#718096';
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(0, 0, 10, 6, 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                    this.ctx.restore();
+                });
+            }
+
+            drawSnow(w, h) {
+                this.snow.forEach(f => {
+                    const x = f.x + Math.sin(this.cloudOffset * 0.3 + f.phase) * 6;
+                    this.ctx.save();
+                    this.ctx.globalAlpha = 0.5;
+                    this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, f.y, f.r, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                });
+            }
+
+            drawObstacles(w, h) {
+                this.obstacles.forEach(obs => {
+                    const t = this.depthT(obs.y);
+                    const ds = this.depthScale(t);
+                    const roadHalf = this.roadHalfAt(t);
+                    const x = (0.5 + obs.lane * roadHalf * 0.85) * w;
+                    const scale = 0.42 + 0.58 * ds;
+
+                    this.ctx.save();
+                    this.ctx.globalAlpha = 0.35 + 0.65 * ds;
+                    this.ctx.translate(x, obs.y);
+                    this.ctx.scale(scale, scale);
+
+                    this.ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                    this.ctx.beginPath();
+                    this.ctx.roundRect(-68, -16, 136, 40, 8);
+                    this.ctx.fill();
+
+                    const grad = this.ctx.createLinearGradient(0, -20, 0, 20);
+                    grad.addColorStop(0, '#FFFFFF');
+                    grad.addColorStop(1, '#EDF2F7');
+                    this.ctx.fillStyle = grad;
+                    this.ctx.strokeStyle = this.teamId === 1 ? '#2B6CB0' : '#C05621';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+                    this.ctx.roundRect(-66, -20, 132, 40, 8);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+
+                    this.ctx.fillStyle = '#1A202C';
+                    this.ctx.font = "900 13px 'Montserrat', sans-serif";
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(obs.text.toUpperCase(), 0, 1);
+                    this.ctx.restore();
+                });
+            }
+
+            drawTrailParticles() {
+                this.trailParticles.forEach(p => {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = Math.max(0, p.life / p.maxLife) * 0.7;
+                    this.ctx.fillStyle = 'rgb(' + p.color + ')';
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                });
+            }
+
+            drawSpeedLines(bx, by) {
+                const n = 5;
+                const alpha = Math.min(0.5, (this.speedMultiplier - 1.4) * 0.6);
+                this.ctx.save();
+                this.ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
+                this.ctx.lineWidth = 3;
+                for (let i = 0; i < n; i++) {
+                    const ang = -1.4 + i * 0.3 + Math.random() * 0.1;
+                    const len = 30 + Math.random() * 20;
+                    const sx = bx + Math.cos(ang) * this.boulderRadius * 0.6;
+                    const sy = by + Math.sin(ang) * this.boulderRadius * 0.6 - this.boulderRadius * 0.3;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(sx, sy);
+                    this.ctx.lineTo(sx + Math.cos(ang) * len, sy + Math.sin(ang) * len);
+                    this.ctx.stroke();
+                }
+                this.ctx.restore();
+            }
+
+            draw3DLowPolyBoulder(x, y) {
+                this.ctx.save();
+                this.ctx.translate(x, y);
+
+                // Sombra proyectada (antes del "squash" para que no se deforme)
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+                this.ctx.beginPath();
+                this.ctx.ellipse(0, this.boulderRadius - 4, this.boulderRadius * 1.15, 16, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // Ligero "tumbado" hacia adelante para reforzar la sensación 3D
+                const tumble = 1 - 0.10 * Math.abs(Math.sin(this.boulderRotation * 1.3));
+                this.ctx.scale(1, tumble);
+
+                const cos = Math.cos(this.boulderRotation);
+                const sin = Math.sin(this.boulderRotation);
+
+                const rotatedVerts = this.polyNodes.map(v => [
+                    v[0] * cos - v[1] * sin,
+                    v[0] * sin + v[1] * cos,
+                    v[2]
+                ]);
+
+                const lightDir = [0.5, -0.6, 0.62];
+
+                this.polyFaces.forEach(face => {
+                    const p1 = rotatedVerts[face[0]];
+                    const p2 = rotatedVerts[face[1]];
+                    const p3 = rotatedVerts[face[2]];
+
+                    const nx = (p2[1] - p1[1]) * (p3[2] - p1[2]) - (p2[2] - p1[2]) * (p3[1] - p1[1]);
+                    const ny = (p2[2] - p1[2]) * (p3[0] - p1[0]) - (p2[0] - p1[0]) * (p3[2] - p1[2]);
+                    const nz = (p2[0] - p1[0]) * (p3[1] - p1[1]) - (p2[1] - p1[1]) * (p3[0] - p1[0]);
+                    const len = Math.hypot(nx, ny, nz) || 1;
+
+                    const dot = Math.max(0.22, (nx / len * lightDir[0] + ny / len * lightDir[1] + nz / len * lightDir[2]));
+                    let r = Math.floor(dot * 160 + 40);
+                    let g = r + 8;
+                    let b = r + 20;
+
+                    // Brillo especular en las caras mejor iluminadas
+                    if (dot > 0.8) {
+                        const shine = (dot - 0.8) / 0.2;
+                        r = Math.floor(r + (255 - r) * shine * 0.8);
+                        g = Math.floor(g + (255 - g) * shine * 0.8);
+                        b = Math.floor(b + (255 - b) * shine * 0.9);
+                    }
+
+                    // Ligero matiz helado en el borde de silueta
+                    const rim = 1 - Math.min(1, Math.abs(nz / len) * 1.4);
+                    if (rim > 0.45) {
+                        const rimAmt = (rim - 0.45) / 0.55 * 0.3;
+                        r = Math.floor(r * (1 - rimAmt) + 99 * rimAmt);
+                        g = Math.floor(g * (1 - rimAmt) + 179 * rimAmt);
+                        b = Math.floor(b * (1 - rimAmt) + 237 * rimAmt);
+                    }
+
+                    this.ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    this.ctx.strokeStyle = 'rgb(' + Math.max(0, r - 30) + ',' + Math.max(0, g - 25) + ',' + Math.max(0, b - 15) + ')';
+                    this.ctx.lineWidth = 1.3;
+
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p1[0], p1[1]);
+                    this.ctx.lineTo(p2[0], p2[1]);
+                    this.ctx.lineTo(p3[0], p3[1]);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                    this.ctx.stroke();
+                });
+
+                this.ctx.restore();
+            }
+
+            drawExplosionParticles() {
+                const bx = this.boulderX * this.canvas.width;
+                const by = this.boulderY();
+
+                if (this.explosionTimer < 20) {
+                    const p = this.explosionTimer / 20;
+                    this.ctx.save();
+                    this.ctx.globalAlpha = 1 - p;
+                    this.ctx.strokeStyle = '#F6E05E';
+                    this.ctx.lineWidth = 6 * (1 - p) + 2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(bx, by, this.boulderRadius * (1 + p * 1.8), 0, Math.PI * 2);
+                    this.ctx.stroke();
+                    this.ctx.restore();
+                }
+
+                this.particles.forEach(p => {
+                    this.ctx.save();
+                    this.ctx.translate(p.x, p.y);
+                    this.ctx.rotate(p.rot);
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    this.ctx.restore();
+                });
+
+                this.ctx.fillStyle = '#E53E3E';
+                this.ctx.font = "900 32px 'Baloo 2', sans-serif";
+                this.ctx.textAlign = 'center';
+                this.ctx.strokeStyle = '#000';
+                this.ctx.lineWidth = 4;
+                this.ctx.strokeText("¡EXPLOSIÓN!", bx, this.canvas.height - 180);
+                this.ctx.fillText("¡EXPLOSIÓN!", bx, this.canvas.height - 180);
+            }
+
+            draw8BitClimber(x, y, panicked = false) {
+                this.ctx.save();
+                this.ctx.translate(x, y);
+
+                this.ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                this.ctx.beginPath();
+                this.ctx.ellipse(0, 14, 10, 3, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                const teamColor = this.teamId === 1 ? '#3182CE' : '#DD6B20';
+
+                this.ctx.fillStyle = this.teamId === 1 ? '#2C5282' : '#9C4221';
+                this.ctx.fillRect(-9, -13, 4, 9);
+
+                this.ctx.fillStyle = '#FBD38D';
+                this.ctx.fillRect(-5, -24, 10, 10);
+
+                this.ctx.fillStyle = '#E53E3E';
+                this.ctx.fillRect(-6, -28, 12, 4);
+
+                this.ctx.fillStyle = teamColor;
+                this.ctx.fillRect(-6, -14, 12, 10);
+
+                if (panicked) {
+                    this.ctx.fillStyle = '#FBD38D';
+                    this.ctx.fillRect(-12, -22, 5, 5);
+                    this.ctx.fillRect(7, -22, 5, 5);
+                } else {
+                    const legMove = Math.sin(this.boulderRotation * 5) * 4;
+                    this.ctx.fillStyle = '#1A202C';
+                    this.ctx.fillRect(-5, -4, 4, 6 + legMove);
+                    this.ctx.fillRect(1, -4, 4, 6 - legMove);
+                }
+
+                this.ctx.restore();
+            }
+
+            drawFloatingTexts() {
+                this.floatingTexts.forEach(ft => {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = Math.max(0, ft.life / 55);
+                    this.ctx.fillStyle = ft.color;
+                    this.ctx.font = "800 22px 'Baloo 2', 'Montserrat', sans-serif";
+                    this.ctx.textAlign = 'center';
+                    this.ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+                    this.ctx.lineWidth = 4;
+                    this.ctx.strokeText(ft.text, ft.x, ft.y);
+                    this.ctx.fillText(ft.text, ft.x, ft.y);
+                    this.ctx.restore();
+                });
+            }
+
+            drawVignette(w, h) {
+                const grad = this.ctx.createRadialGradient(w / 2, h / 2, h * 0.35, w / 2, h / 2, h * 0.78);
+                grad.addColorStop(0, 'rgba(0,0,0,0)');
+                grad.addColorStop(1, 'rgba(0,0,0,0.45)');
+                this.ctx.fillStyle = grad;
+                this.ctx.fillRect(0, 0, w, h);
+            }
+        }
+
+        // --- INICIALIZACIÓN GLOBAL ---
+        let g1, g2;
+        let isRunning = false;
+
+        window.onload = () => {
+            g1 = new ModernMountainGame(1, 'canvas-1', 'target-1', 'score-1', 't1');
+            g2 = new ModernMountainGame(2, 'canvas-2', 'target-2', 'score-2', 't2');
+
+            bindTouchAndKeyboard();
+            window.addEventListener('resize', () => {
+                g1.resizeCanvas();
+                g2.resizeCanvas();
+            });
+
+            requestAnimationFrame(loop);
+        };
+
+        function startGame() {
+            document.getElementById('start-overlay').style.display = 'none';
+            document.getElementById('start-btn').innerText = "REINICIAR";
+
+            const audio = document.getElementById('bgm');
+            audio.play().catch(e => console.log("Autoplay prevenido:", e));
+
+            g1 = new ModernMountainGame(1, 'canvas-1', 'target-1', 'score-1', 't1');
+            g2 = new ModernMountainGame(2, 'canvas-2', 'target-2', 'score-2', 't2');
+
+            g1.nextQuestion();
+            g2.nextQuestion();
+
+            isRunning = true;
+        }
+
+        function updateVolume(v) {
+            document.getElementById('bgm').volume = v;
+        }
+
+        function loop() {
+            if (isRunning) {
+                g1.update();
+                g2.update();
+            } else {
+                g1.updateAmbient();
+                g2.updateAmbient();
+            }
+            g1.draw();
+            g2.draw();
+            requestAnimationFrame(loop);
+        }
+
+        function bindTouchAndKeyboard() {
+            const registerTouch = (el, getInstance) => {
+                const handle = (e) => {
+                    e.preventDefault();
+                    const inst = getInstance();
+                    if (e.touches.length === 0) { inst.moveDir = 0; return; }
+                    const rect = el.getBoundingClientRect();
+                    const touchX = e.touches[0].clientX - rect.left;
+                    inst.moveDir = touchX < rect.width / 2 ? -1 : 1;
+                };
+                el.addEventListener('touchstart', handle, { passive: false });
+                el.addEventListener('touchmove', handle, { passive: false });
+                el.addEventListener('touchend', (e) => { e.preventDefault(); getInstance().moveDir = 0; }, { passive: false });
+            };
+
+            registerTouch(document.getElementById('t1'), () => g1);
+            registerTouch(document.getElementById('t2'), () => g2);
+
+            window.addEventListener('keydown', e => {
+                if (e.key === 'a' || e.key === 'A') g1.moveDir = -1;
+                if (e.key === 'd' || e.key === 'D') g1.moveDir = 1;
+                if (e.key === 'ArrowLeft') g2.moveDir = -1;
+                if (e.key === 'ArrowRight') g2.moveDir = 1;
+            });
+
+            window.addEventListener('keyup', e => {
+                if (['a', 'A', 'd', 'D'].includes(e.key)) g1.moveDir = 0;
+                if (['ArrowLeft', 'ArrowRight'].includes(e.key)) g2.moveDir = 0;
+            });
+        }
+    </script>
+</body>
+</html>
